@@ -72,4 +72,14 @@ class simulator():
             self.data['CountD'].append(countD)
             self.data['Map'].append(resultMap)
 
+        # Get the overall winner
+        finalR = np.sum(np.array(self.data['President']) == self.nameR)
+        finalD = np.sum(np.array(self.data['President']) == self.nameD)
+        if (finalR > finalD):
+            self.data['Overall'] = self.nameR
+        elif (finalR < finalD):
+            self.data['Overall'] = self.nameD
+        else:
+            self.data['Overall'] = 'tie'
+
         return

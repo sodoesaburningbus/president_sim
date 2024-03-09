@@ -25,7 +25,6 @@ matplotlib.use('Agg')
 
 ### Import modules
 import cartopy .crs as ccrs
-import cartopy.feature as cfeature
 import cartopy.io.shapereader as creader
 import matplotlib.pyplot as pp
 import numpy as np
@@ -58,6 +57,8 @@ countR_hist = np.cumsum(countR_hist)/np.sum(countR_hist)*100.0
 countD_hist = np.cumsum(countD_hist)/np.sum(countD_hist)*100.0
 
 ### print some stuff
+print(f'Number of simulations: {nsims}')
+print(f'Overall Winner: {sim.data["Overall"]}')
 print(f'CA Flips: {nCA_flips}')
 print(f'TX Flips: {nTX_flips}')
 
