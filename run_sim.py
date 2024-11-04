@@ -9,13 +9,13 @@ nsims = 10000
 
 # Candidate names
 nameR = 'Trump'
-nameD = 'Biden'
+nameD = 'Harris'
 
 # File with the state election odds
-ifile = 'input.default.csv'
+ifile = 'input.csv'
 
 # Directory to save the images
-sdir = 'images/default'
+sdir = 'images/'
 
 #####  END OPTIONS #####
 
@@ -111,18 +111,18 @@ pp.close()
 # Tally victories for each state
 countsR = {}
 countsD = {}
+for k in sorted(emap.keys()):
+    countsR[k] = 0
+    countsD[k] = 0
 for emap in sim.data['Map']:
     for k in sorted(emap.keys()):
-        try:
-            countsR[k] = 0
-            countsD[k] = 0
-        except:
-            pass
         
         if (emap[k] == nameR):
             countsR[k] += 1
         else:
             countsD[k] += 1
+
+print(countsR)
 
 # Make the map
 # Create plotting objects
