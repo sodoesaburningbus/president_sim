@@ -35,6 +35,9 @@ from model import simulator
 ### Load input file
 df = pd.read_csv(ifile, names=['state','prob','votes'])
 
+print(np.sum(df['votes'].values*df['prob'].values))
+print(np.sum(df['votes'].values*(1.0-df['prob'].values)))
+
 ### Setup and run the simulations
 sim = simulator(input_file=ifile, nameR=nameR, nameD=nameD)
 sim.run_sim(runs=nsims)
@@ -52,13 +55,18 @@ oddsR = np.sum(np.array(sim.data['President']) == nameR)/len(sim.data['President
 oddsD = np.sum(np.array(sim.data['President']) == nameD)/len(sim.data['President'])*100.0
 oddsT = np.sum(np.array(sim.data['President']) == 'tie')/len(sim.data['President'])*100.0
 
-# Compute cumulative histograms
-countR_hist, edgesR = np.histogram(sim.data['CountR'], bins=40, range=(0,540), density=False)
-countD_hist, edgesD = np.histogram(sim.data['CountD'], bins=40, range=(0,540), density=False)
+# Histogram electoral counts
+countR_hist, edgesR = np.histogram(sim.data['CountR'], bins=40, range=(0,540), density=True)
+countD_hist, edgesD = np.histogram(sim.data['CountD'], bins=40, range=(0,540), density=True)
 centersR = (edgesR[1:]+edgesR[:-1])/2.0
 centersD = (edgesD[1:]+edgesD[:-1])/2.0
-countR_hist = np.cumsum(countR_hist)/np.sum(countR_hist)*100.0
-countD_hist = np.cumsum(countD_hist)/np.sum(countD_hist)*100.0
+
+countR_hist *= 100.0
+countD_hist *= 100.0
+
+# Compute cumulative histograms
+countR_hist_summed = np.cumsum(countR_hist)/np.sum(countR_hist)*100.0
+countD_hist_summed = np.cumsum(countD_hist)/np.sum(countD_hist)*100.0
 
 ### print some stuff
 print(f'Number of simulations: {nsims}')
@@ -89,10 +97,10 @@ fig, (ax1, ax2) = pp.subplots(figsize=(6.5, 9), nrows=2)
 # First histogram
 ax1.bar(centersR, countR_hist, color='darkred', width=12)
 ax1.set_ylabel('Frequency (%)', fontsize=14, fontweight='roman')
-ax1.set_title('Cumulative Electoral Vote Distribution\n', fontsize=14, fontweight='roman')
+ax1.set_title('Electoral Vote Distribution\n', fontsize=14, fontweight='roman')
 ax1.set_title(nameR, loc='left', ha='left', fontsize=14, fontweight='roman')
 ax1.set_xlim(0, 540)
-ax1.set_ylim(0, 100)
+ax1.set_ylim(0, 10)
 ax1.axvline(270, linestyle='--', linewidth=2.0, color='black')
 ax1.text(268, 90, '270', ha='right', va='center', color='black', fontsize=12)
 
@@ -101,12 +109,38 @@ ax2.bar(centersD, countD_hist, color='darkblue', width=12)
 ax2.set_ylabel('Frequency (%)', fontsize=14, fontweight='roman')
 ax2.set_xlabel('Electoral Votes', fontsize=14, fontweight='roman')
 ax2.set_xlim(0, 540)
-ax2.set_ylim(0, 100)
+ax2.set_ylim(0, 10)
 ax2.axvline(270, linestyle='--', linewidth=2.0, color='black')
 ax2.text(268, 90, '270', ha='right', va='center', color='black', fontsize=12)
 ax2.set_title(nameD, loc='left', ha='left', fontsize=14, fontweight='roman')
 
 pp.savefig(f'{sdir}/electoral_vote_histogram.png')
+pp.close()
+
+# Cumulative histograms of electoral vote distributions
+fig, (ax1, ax2) = pp.subplots(figsize=(6.5, 9), nrows=2)
+
+# First histogram
+ax1.bar(centersR, countR_hist_summed, color='darkred', width=12)
+ax1.set_ylabel('Frequency (%)', fontsize=14, fontweight='roman')
+ax1.set_title('Cumulative Electoral Vote Distribution\n', fontsize=14, fontweight='roman')
+ax1.set_title(nameR, loc='left', ha='left', fontsize=14, fontweight='roman')
+ax1.set_xlim(0, 540)
+ax1.set_ylim(0, 100)
+ax1.axvline(270, linestyle='--', linewidth=2.0, color='black')
+ax1.text(268, 90, '270', ha='right', va='center', color='black', fontsize=12)
+
+# Second histogram
+ax2.bar(centersD, countD_hist_summed, color='darkblue', width=12)
+ax2.set_ylabel('Frequency (%)', fontsize=14, fontweight='roman')
+ax2.set_xlabel('Electoral Votes', fontsize=14, fontweight='roman')
+ax2.set_xlim(0, 540)
+ax2.set_ylim(0, 100)
+ax2.axvline(270, linestyle='--', linewidth=2.0, color='black')
+ax2.text(268, 90, '270', ha='right', va='center', color='black', fontsize=12)
+ax2.set_title(nameD, loc='left', ha='left', fontsize=14, fontweight='roman')
+
+pp.savefig(f'{sdir}/electoral_vote_cumulative_histogram.png')
 pp.close()
 
 ### Create the Modal Map of the election
