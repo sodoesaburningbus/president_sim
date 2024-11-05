@@ -30,6 +30,9 @@ class simulator():
         self.inputs['probs'] = np.array(self.inputs['probs'], dtype='float')
         self.inputs['votes'] = np.array(self.inputs['votes'], dtype='int')
 
+        # Create the Expected Value prediction from probabilities
+        self.basic = np.sum(self.inputs['probs']*self.inputs['votes'])
+
         return
     
     # Function to run the simulation

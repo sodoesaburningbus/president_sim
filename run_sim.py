@@ -5,7 +5,7 @@
 ##### START OPTIONS #####
 
 # Number of simulations to run
-nsims = 10000
+nsims = 100000
 
 # Candidate names
 nameR = 'Trump'
@@ -28,8 +28,12 @@ import cartopy .crs as ccrs
 import cartopy.io.shapereader as creader
 import matplotlib.pyplot as pp
 import numpy as np
+import pandas as pd
 
 from model import simulator
+
+### Load input file
+df = pd.read_csv(ifile, names=['state','prob','votes'])
 
 ### Setup and run the simulations
 sim = simulator(input_file=ifile, nameR=nameR, nameD=nameD)
@@ -58,9 +62,8 @@ countD_hist = np.cumsum(countD_hist)/np.sum(countD_hist)*100.0
 
 ### print some stuff
 print(f'Number of simulations: {nsims}')
-print(f'Overall Winner: {sim.data["Overall"]}')
-print(f'CA Flips: {nCA_flips}')
-print(f'TX Flips: {nTX_flips}')
+print(f'Monte Carlo Winner: {sim.data["Overall"]}')
+print(f'Expected Value Winner: {"Trump" if sim.basic > 270 else "Harris"}')
 
 ### Make some plots
 
@@ -111,9 +114,11 @@ pp.close()
 # Tally victories for each state
 countsR = {}
 countsD = {}
+emap = sim.data['Map'][0]
 for k in sorted(emap.keys()):
     countsR[k] = 0
     countsD[k] = 0
+
 for emap in sim.data['Map']:
     for k in sorted(emap.keys()):
         
@@ -121,8 +126,6 @@ for emap in sim.data['Map']:
             countsR[k] += 1
         else:
             countsD[k] += 1
-
-print(countsR)
 
 # Make the map
 # Create plotting objects
@@ -140,6 +143,7 @@ states_shp = creader.natural_earth(resolution='110m',
 ax.set_title('State Outcomes')
 
 # Loop over the states
+modal_election = 0
 for state in creader.Reader(states_shp).records():  
 
     name = state.__dict__['attributes']['gn_name']
@@ -147,6 +151,7 @@ for state in creader.Reader(states_shp).records():
     # simple scheme to assign color to each state
     if (countsR[name] > countsD[name]):
         facecolor = 'darkred'
+        modal_election += df.votes.loc[df.state == name].values[0]
     elif (countsD[name] > countsR[name]):
         facecolor = 'darkblue'
     else:
@@ -156,4 +161,5 @@ for state in creader.Reader(states_shp).records():
     ax.add_geometries([state.geometry], ccrs.PlateCarree(),
                       facecolor=facecolor, edgecolor='black')
 
+print(f'Winner based on modal map: {"Trump" if modal_election > 270 else "Harris"}')
 pp.savefig(f'{sdir}/modal_electoral_map.png')
